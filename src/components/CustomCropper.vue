@@ -173,6 +173,7 @@
     width: 840px;
     height: 524px;
     background-color: #fff;
+    user-select: none;
   }
 
   .modal-head {
@@ -318,6 +319,8 @@
 
     .cropper-modal .modal {
       max-width: 100%;
+      position: fixed;
+      overscroll-behavior: contain;
     }
 
     .img-clip-wrap {
@@ -328,6 +331,5 @@
       max-width: 100%;
     }
 }
-
 
 </style>
