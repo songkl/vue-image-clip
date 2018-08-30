@@ -1,18 +1,24 @@
 <template>
-  <div class="crop-wrap" @mousedown="wrapMouseDown">
+  <div ref="cropWrap" class="crop-wrap">
     <div class="shadow-box" :style="recStyle">
       <img :src="img" class="shadow-img" :style="imgStyle">
     </div>
-    <div class="crop-box" @mousedown="boxMouseDown" :class="showBox ? 'show': ''" :style="recStyle">
-      <span class="drag-point point-lt" @mousedown="pointMouseDown('drag-lt', $event)"></span>
-      <span class="drag-point point-lb" @mousedown="pointMouseDown('drag-lb', $event)"></span>
-      <span class="drag-point point-rt" @mousedown="pointMouseDown('drag-rt', $event)"></span>
-      <span class="drag-point point-rb" @mousedown="pointMouseDown('drag-rb', $event)"></span>
+    <div ref="cropBox" class="crop-box" :class="showBox ? 'show': ''" :style="recStyle">
+      <span ref="lt" type="drag-lt" class="drag-point point-lt"></span>
+      <span ref="lb" type="drag-lb" class="drag-point point-lb"></span>
+      <span ref="rt" type="drag-rt" class="drag-point point-rt"></span>
+      <span ref="rb" type="drag-rb" class="drag-point point-rb"></span>
     </div>
   </div>
 </template>
 
 <script>
+
+const touch = navigator && navigator.maxTouchPoints
+const up_event_name = touch?'touchend':'mouseup'
+const down_event_name = touch?'touchstart':'mousedown'
+const move_event_name = touch?'touchmove':'mousemove'
+
   export default {
     props: {
       ratio: {},
@@ -44,12 +50,33 @@
       }
     },
     mounted () {
-      window.addEventListener('mouseup', this.disableDrag)
-      window.addEventListener('mousemove', this.updateRec)
+
+      window.addEventListener(up_event_name, this.disableDrag)
+      window.addEventListener(move_event_name, this.updateRec)
+
+
+     this.$refs.cropWrap.addEventListener(down_event_name, this.wrapMouseDown)
+     this.$refs.cropBox.addEventListener(down_event_name, this.boxMouseDown)
+
+     this.$refs.lt.addEventListener(down_event_name, this.pointMouseDown)
+     this.$refs.lb.addEventListener(down_event_name, this.pointMouseDown)
+     this.$refs.rt.addEventListener(down_event_name, this.pointMouseDown)
+     this.$refs.rb.addEventListener(down_event_name, this.pointMouseDown)
+
     },
     beforeDestroy () {
-      window.removeEventListener('mouseup', this.disableDrag)
-      window.removeEventListener('mousemove', this.updateRec)
+      window.removeEventListener(up_event_name, this.disableDrag)
+      window.removeEventListener(move_event_name, this.updateRec)
+
+
+     this.$refs.cropWrap.removeEventListener(down_event_name, this.wrapMouseDown)
+     this.$refs.cropBox.removeEventListener(down_event_name, this.boxMouseDown)
+
+     this.$refs.lt.removeEventListener(down_event_name, this.pointMouseDown)
+     this.$refs.lb.removeEventListener(down_event_name, this.pointMouseDown)
+     this.$refs.rt.removeEventListener(down_event_name, this.pointMouseDown)
+     this.$refs.rb.removeEventListener(down_event_name, this.pointMouseDown)
+
     },
     methods: {
       getLeft (el) {
@@ -89,18 +116,40 @@
           this.referPoint = {x: this.rec.l, y: this.rec.t}
         }
       },
-      pointMouseDown (name, e) {
-        this.initAction(name, e.pageX, e.pageY)
-        e.stopPropagation()
+      pointMouseDown (event) {
+        let type = event.target.getAttribute('type')
+
+        let e = event
+
+        if(touch){
+            e = event.touches[0]
+        }
+
+        this.initAction(type, e.pageX, e.pageY)
+        event.stopPropagation()
       },
-      boxMouseDown (e) {
+      boxMouseDown (event) {
+
+        let e = event
+
+        if(touch){
+           e = event.touches[0]
+        }
+
         this.initAction('move', e.pageX, e.pageY)
-        e.stopPropagation()
+        event.stopPropagation()
       },
-      wrapMouseDown (e) {
+      wrapMouseDown (event) {
         if (this.rec.w && this.rec.h) {
           return
         }
+
+        let e = event
+
+        if(touch){
+            e = event.touches[0]
+        }
+
         this.initAction('cross', e.pageX, e.pageY)
         this.rec = {
           w: 0,
@@ -108,7 +157,7 @@
           l: e.pageX - this.pl,
           t: e.pageY - this.pt
         }
-        e.stopPropagation()
+        event.stopPropagation()
       },
       disableDrag () {
         if (this.action) {
@@ -120,9 +169,15 @@
         this.action = ''
         this.rec = {w: 0, h: 0, l: 0, t: 0}
       },
-      updateRec (e) {
+      updateRec (event) {
         if (!this.action) {
           return
+        }
+
+        let e = event
+
+        if(touch){
+            e = event.touches[0]
         }
 
         const elWidth = this.$el.offsetWidth
@@ -281,7 +336,7 @@
     width: 0;
     height: 0;
     cursor: move;
-    border: 1px solid #fff;
+    border: 1px solid rgba(255,255,255,.2);
     z-index: 2;
     box-sizing: border-box;
   }
@@ -292,34 +347,46 @@
 
   .drag-point {
     display: inline-block;
-    width: 10px;
-    height: 10px;
-    border: 1px solid #fff;
+    width: 30px;
+    height: 30px;
+    max-width: 20%;
+    max-height: 20%;
+    border: 1px solid rgba(0,0,0,.5);
     position: absolute;
     box-sizing: border-box;
   }
 
   .point-lt {
-    top: -10px;
-    left: -10px;
+    top: -2px;
+    left: -2px;
+    cursor: nw-resize;
+    border-bottom-color: transparent;
+    border-right-color: transparent;
+
     cursor: nw-resize;
   }
 
   .point-lb {
-    left: -10px;
-    bottom: -10px;
+    left: -2px;
+    bottom: -2px;
+    border-top-color: transparent;
+    border-right-color: transparent;
     cursor: sw-resize;
   }
 
   .point-rt {
-    right: -10px;
-    top: -10px;
+    right: -2px;
+    top: -2px;
+    border-bottom-color: transparent;
+    border-left-color: transparent;
     cursor: ne-resize;
   }
 
   .point-rb {
-    right: -10px;
-    bottom: -10px;
+    right: -2px;
+    bottom: -2px;
+    border-top-color: transparent;
+    border-left-color: transparent;
     cursor: se-resize;
   }
 

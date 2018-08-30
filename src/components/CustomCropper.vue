@@ -53,7 +53,7 @@
         nw: 0,
         nh: 0,
         clipData: null,
-        ratio: 16 / 10, // equal to SelectBox's width / height
+        ratio: 10 / 10, // equal to SelectBox's width / height
         imgSize: {w: 0, h: 0},
         containerTop: 0
       }
@@ -259,7 +259,7 @@
   }
 
   .pre-container {
-    width: 240px;
+    width: 150px;
     height: 150px;
     background-color: #000;
     overflow: hidden;
@@ -312,4 +312,22 @@
   .btn-confirm:hover {
     background-color: #00b5e5;
   }
+
+
+@media screen and (max-width:767px){
+
+    .cropper-modal .modal {
+      max-width: 100%;
+    }
+
+    .img-clip-wrap {
+      max-width: 100%;
+    }
+
+    .container-bg {
+      max-width: 100%;
+    }
+}
+
+
 </style>
