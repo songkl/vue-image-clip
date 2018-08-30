@@ -13,7 +13,6 @@
 </template>
 
 <script>
-
 const touch = typeof(window) && typeof(window.ontouchstart)!='undefined'
 const up_event_name = touch?'touchend':'mouseup'
 const down_event_name = touch?'touchstart':'mousedown'
