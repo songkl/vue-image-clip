@@ -14,7 +14,7 @@
 
 <script>
 
-const touch = navigator && navigator.maxTouchPoints
+const touch = typeof(window) && typeof(window.ontouchstart)!='undefined'
 const up_event_name = touch?'touchend':'mouseup'
 const down_event_name = touch?'touchstart':'mousedown'
 const move_event_name = touch?'touchmove':'mousemove'
